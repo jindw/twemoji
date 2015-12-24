@@ -1,0 +1,181 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+	<script>
+	var exports = {};
+	</script>
+	<style>
+	html,body,#content{
+		width:90%;
+		height:100%;
+		margin:0;
+		padding:0;
+		overflow:auto;
+	}
+	body  b{
+	  list-style:none;
+	  display:inline-block;
+	  border:1px solid gray;
+      padding:14px;
+    }
+    span{
+    	display: inline-block;
+    	padding-right:8px;
+    }
+    code{
+    	display: inline-block;
+	    font-size:10px;
+    	width:20px;
+    	height:20px;
+    }
+    img{
+    	margin-left:20px;
+    }
+	</style>
+	<script src="svg_0.js"></script>
+	<script>
+	var exports0 = exports;
+	var exports = {};
+	</script>
+	<script src="svg.js"></script>
+	<script src="category.js"></script>
+
+</head>
+<body>
+	<script>
+	//<![CDATA[
+
+
+
+	//buf = buf.slice(0,10)
+	function genEntities(entities,symbolMap){
+		entities = entities.concat().sort(function (a,b){
+			var a2 = a.replace(/_.*/,'');
+			var b2 = b.replace(/_.*/,'');
+			var i = a2.length - b2.length;
+			if(a2!=b2){
+				return a2>b2?1:-1
+			}else{
+				return a.length - b.length;
+			}
+		})
+		return entities.map(function(token,i){
+			var json = exports0['$'+token];
+			if(!json){
+				console.error('token not fount:',token)
+				return '';
+			}
+			var xml0 = exports0.toXML(json).replace('<svg ','<svg width="40" height="40" ');
+			var xml1 = exports.toXML(exports['$'+token]).replace('<svg ','<svg width="40" height="40" ');
+			var entity = token.replace(/_?([^$_]+)/g,"&#x$1;");
+
+			var datauri0='',datauri1='';
+			//datauri0= 'data:image/svg+xml;base64,'+btoa(xml0);
+			datauri1='data:image/svg+xml;base64,'+btoa(xml1);
+
+			return ("<b class='emoji-list' title='"+symbolMap['$'+token]+"'><div>"+token.toUpperCase()+'</div><code>'+entity+"</code>"+
+				datauri0.replace(/.*/,"<img src='$&'>") +
+				datauri1.replace(/.*/,"<img src='$&'>") +
+				"</b>");
+		})
+	}
+	var exportsSymbolMap = {};
+	for(var token in exports){
+		if(token.charAt()=='$'){
+			exportsSymbolMap[token] = 1;
+		}
+	}
+	var categoryMap = {} 
+	function collectCategory(category,resultMap,ids){
+		var map = {};
+		var mapSize = 0;
+		
+		for(var n in category){
+			var data = category[n];
+			//console.log(n,ids,data instanceof String)
+			if(ids.length>3){
+				ssss()
+			}
+			if(typeof data =='string'){
+				mapSize++;
+				map[n] = data;
+			}else{//objects
+				collectCategory(data,resultMap,ids.concat(n))
+			}
+		}
+		mapSize && (resultMap[ids.join('/')] = map);
+
+	}
+	collectCategory(category,categoryMap,[])
+	var buf = ['<article id="content">'];
+
+var emojiList = [];
+	for(var n in category){
+			var sbs = gen88List(category[n]);
+			sbs.map(function(c){
+				if(c.replace(/\s/,'')){
+					var v = utf162int(c);
+					var c2 = int2utf16(v);
+					v='$'+v.toString(16);
+					if(c2!=c){
+						console.log(c,v,c2)
+						v += '_'+utf162int(c.substr(c2.length)).toString(16);
+					}
+					delete exportsSymbolMap[v];
+				}
+			})
+			emojiList.push(sbs.join('').replace(/\s+/g,','))
+			buf.push('<h2>'+n+'</h2><ul><textarea>'+sbs.join('')+'</textarea></ul>');
+			//delete exportsSymbolMap[token];
+			categoryMap = {};
+	}
+	for(var n in categoryMap){
+		var symbolMap = categoryMap[n];
+		var symbols = [];
+		var code = ['{']
+		for(var token in symbolMap){
+			var chars = token.slice(1).replace(/[\da-f-A-F]+|_/,function(t){
+				if(t == '_'){
+					return ''
+				//}else if(t.length>4){
+				//	return String.fromCharCode(parseInt(t.slice(0,-4),16),parseInt(t.slice(-4),16));
+				}else{
+					return String.fromCharCode(parseInt(t,16));
+				}
+				
+			})
+			
+			code.push('\t'+token+':"'+chars+':'+symbolMap[token]+'",\n')
+			symbols.push(token.slice(1));
+			delete exportsSymbolMap[token];
+		}
+		code[code.length-1] = code[code.length-1].replace(',\n','\n}')
+		//console.log(symbolMap['$'+token])
+		buf.push('<h2>'+n+'<textarea>'+code.join('')+'</textarea></h2><ul>'+
+			genEntities(symbols,symbolMap).join('')+"</ul>");
+	}
+	var others = [];
+	for(var token in exportsSymbolMap){
+		others.push(token.slice(1));
+		//console.error('token not in category:',n);
+	}
+	console.log(others)
+	buf.push("<h2>!!!!others????</h2><ul>"+genEntities(others,{}).join('')+"</ul>",'</article>')
+	document.write(buf.join(''));
+	//]]>
+	var hs = document.getElementsByTagName('h2');
+	var buf = [];
+	for(var i=0;i<hs.length;i++){
+		var h = hs[i];
+		var t = h.innerHTML.replace(/<[\s\S]+>/,'');
+		h.id='h'+i;
+		buf.push(t.replace(/.*/,'<li><a href="#h'+i+'">$&</a></li>'))
+	}
+	document.write(
+		'<ul style="position:absolute;right:0;top:0">'+
+		buf.join('')+'</ul>'
+		)
+	console.log(emojiList.join('\n').replace(/.+/g,"'$&'.split(','),"))
+	</script>
+</body>
+</html>
